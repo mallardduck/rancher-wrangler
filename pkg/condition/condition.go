@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/rancher/wrangler/v2/pkg/condition/types"
 	"github.com/rancher/wrangler/v2/pkg/generic"
 	"github.com/sirupsen/logrus"
 )
@@ -31,16 +32,16 @@ func (c Cond) GetStatus(obj interface{}) string {
 func (c Cond) SetError(obj interface{}, reason string, err error) {
 	if err == nil || err == generic.ErrSkip {
 		c.True(obj)
-		c.Message(obj, "")
-		c.Reason(obj, reason)
+		c.SetMessage(obj, "")
+		c.SetReason(obj, reason)
 		return
 	}
 	if reason == "" {
 		reason = "Error"
 	}
 	c.False(obj)
-	c.Message(obj, err.Error())
-	c.Reason(obj, reason)
+	c.SetMessage(obj, err.Error())
+	c.SetReason(obj, reason)
 }
 
 func (c Cond) MatchesError(obj interface{}, reason string, err error) bool {
@@ -112,7 +113,12 @@ func (c Cond) CreateUnknownIfNotExists(obj interface{}) {
 	}
 }
 
+// Deprecated: Use SetReason instead
 func (c Cond) Reason(obj interface{}, reason string) {
+	c.SetReason(obj, reason)
+}
+
+func (c Cond) SetReason(obj interface{}, reason string) {
 	cond := findOrCreateCond(obj, string(c))
 	getFieldValue(cond, "Reason").SetString(reason)
 }
@@ -127,11 +133,16 @@ func (c Cond) GetReason(obj interface{}) string {
 
 func (c Cond) SetMessageIfBlank(obj interface{}, message string) {
 	if c.GetMessage(obj) == "" {
-		c.Message(obj, message)
+		c.SetMessage(obj, message)
 	}
 }
 
+// Deprecated: Use SetMessage instead
 func (c Cond) Message(obj interface{}, message string) {
+	c.SetMessage(obj, message)
+}
+
+func (c Cond) SetMessage(obj interface{}, message string) {
 	cond := findOrCreateCond(obj, string(c))
 	setValue(cond, "Message", message)
 }
@@ -142,6 +153,16 @@ func (c Cond) GetMessage(obj interface{}) string {
 		return ""
 	}
 	return getFieldValue(*cond, "Message").String()
+}
+
+func (c Cond) Name() string {
+	return string(c)
+}
+
+func (c Cond) ToKatesCondition() types.Condition {
+	return &MetaV1ConditionHandler{
+		RootCondition: c,
+	}
 }
 
 func touchTS(value reflect.Value) {
