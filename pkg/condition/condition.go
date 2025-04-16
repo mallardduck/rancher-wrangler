@@ -159,7 +159,7 @@ func (c Cond) Name() string {
 	return string(c)
 }
 
-func (c Cond) ToKatesCondition() types.Condition {
+func (c Cond) ToK8sCondition() types.Condition {
 	return &MetaV1ConditionHandler{
 		RootCondition: c,
 	}
