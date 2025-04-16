@@ -1,7 +1,7 @@
 package condition
 
 import (
-	"github.com/rancher/wrangler/v3/pkg/genericcondition"
+	"github.com/rancher/wrangler/v2/pkg/genericcondition"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -34,6 +34,15 @@ const (
 	TestCondtion        Cond = "Test"
 	AnotherTestCondtion Cond = "SecondTest"
 )
+
+func TestHasCondition(t *testing.T) {
+	testObj := newTestObj(TestCondtion)
+	assert.Equal(t, true, TestCondtion.HasCondition(&testObj))
+	assert.Equal(t, true, TestCondtion.HasCondition(&testObj.Status))
+
+	assert.Equal(t, false, AnotherTestCondtion.HasCondition(&testObj))
+	assert.Equal(t, false, AnotherTestCondtion.HasCondition(&testObj.Status))
+}
 
 func TestGetStatus(t *testing.T) {
 	testObj := newTestObj(TestCondtion)

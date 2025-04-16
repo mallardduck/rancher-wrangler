@@ -10,6 +10,20 @@ import (
 
 type Cond string
 
+func (c Cond) HasCondition(obj interface{}) bool {
+	condSlice := getValue(obj, "Status", "Conditions")
+	if !condSlice.IsValid() {
+		condSlice = getValue(obj, "Conditions")
+	}
+
+	foundCond := findCond(obj, condSlice, string(c))
+	if foundCond != nil {
+		return true
+	}
+
+	return false
+}
+
 func (c Cond) GetStatus(obj interface{}) string {
 	return getStatus(obj, string(c))
 }
